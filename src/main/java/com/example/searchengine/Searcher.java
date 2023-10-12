@@ -16,12 +16,22 @@ public class Searcher {
      * @return the list of urls
      */
     public List<String> search(String keyword, String flippedIndexFileName){
-        long duration = 0; //TODO: update the value in the code
+        long duration = System.currentTimeMillis();
         List<String> urls = new ArrayList<>();
-        //TODO: complete
-        System.out.println("duration searcher flipped: "+duration);
+        try {
+            CSVReader reader = new CSVReader(new FileReader(flippedIndexFileName));
+            List<String[]> csvLines = reader.readAll();
+            for(String[] line : csvLines){
+                if (line[0].equals(keyword)){
+                    for (int i = 1; i < line.length ; i++) {
+                        urls.add("https://api.interactions.ics.unisg.ch/hypermedia-environment"+line[i]);
+                    }
+                }
+            }
+            } catch (Exception e){
+            e.printStackTrace();
+        }
+        System.out.println("duration searcher flipped: " + (System.currentTimeMillis() - duration));
         return urls;
     }
-
-
 }

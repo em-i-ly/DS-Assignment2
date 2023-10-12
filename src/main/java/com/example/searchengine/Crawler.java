@@ -37,9 +37,14 @@ public abstract class Crawler {
         List<List<String>> returnList = new ArrayList<>();
         try {
             URL url = new URL(urlString);
-            Elements elements; //TODO: initialize elements based on the webpage at the given url.
-            //TODO: Use elements to put the keywords in the webpage in the list keywords.
-            //TODO: Use elements to the hyperlinks to other pages in the environment in the list hyperlinks.
+            Document doc = Jsoup.connect(url.toString()).get();
+            Elements elements = doc.getElementsByTag("p");
+            elements.forEach(x->{
+                keywords.add(x.text());
+                x.remove();
+            });
+            elements = doc.select("a[href]");
+            elements.forEach(x->hyperlinks.add(baseUrl+x.text()));
         } catch (Exception e){
             e.printStackTrace();
         }

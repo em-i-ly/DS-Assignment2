@@ -7,7 +7,6 @@ import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Component;
 
 @Component
-@ConfigurationProperties
 @Primary
 public class SearchEngineProperties {
 
@@ -15,6 +14,7 @@ public class SearchEngineProperties {
     private boolean crawl;
     @Value("${crawler}")
     private String crawler;
+
 
     public boolean getCrawl(){
         return crawl;

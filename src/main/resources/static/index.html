@@ -1,11 +1,13 @@
 <!DOCTYPE html>
 <html>
-<head><title>Hypermedia Environment</title></head>
+<head>
+    <title>Hypermedia Environment</title>
+</head>
 <body>
-<form id = "form_id" action = "/search" method = "get">
-    <!--add input for keyword-->
-    <!--add button for "Search"-->
-    <!--add button for "I'm feeling lucky"-->
+<form id="form_id" action="/search" method="get">
+    <input type="text" name="q" placeholder="Enter search term" required>
+    <button type="submit">Search</button>
+    <button formaction="/lucky" formmethod="get">I'm feeling Lucky</button>
 </form>
 </body>
 </html>

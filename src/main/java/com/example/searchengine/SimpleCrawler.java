@@ -14,18 +14,18 @@ public class SimpleCrawler extends Crawler {
 
     public void crawl(String startUrl){
         try {
-            int duration = 0; //TODO: update the value in the code
+            long duration = System.currentTimeMillis();
             Set<String[]> lines = explore(startUrl, new HashSet<>(), new HashSet<>());
             FileWriter fileWriter = new FileWriter(indexFileName);
-            CSVWriter writer = new CSVWriter(fileWriter,',', CSVWriter.NO_QUOTE_CHARACTER,' ',"\r\n");
+            CSVWriter writer = new CSVWriter(fileWriter,',', CSVWriter.NO_QUOTE_CHARACTER,' ',"\n");
             for (String[] line : lines) {
                 writer.writeNext(line);
             }
-            System.out.println("duration simple crawler: "+duration);
+            writer.close();
+            System.out.println("duration simple crawler: "+(System.currentTimeMillis() - duration));
         } catch (Exception e){
             e.printStackTrace();
         }
-
     }
 
     /**
@@ -36,10 +36,18 @@ public class SimpleCrawler extends Crawler {
      * @return the set of lines to print on the index file
      */
     public Set<String[]> explore(String startUrl, Set<String[]> lines, Set<String> visited){
-        //TODO: complete the exploration program.
+        if (visited.contains(startUrl)) {
+            return lines;
+        }
+        List<List<String>> content = getInfo(startUrl);
+        String[] keywords = new String[content.get(0).size() + 1];
+        keywords[0] = startUrl.substring(startUrl.lastIndexOf('/'));
+        System.arraycopy(content.get(0).toArray(String[]::new), 0, keywords, 1, content.get(0).size());
+        lines.add(keywords);
+        visited.add(startUrl);
+        for (String link : content.get(1)){
+            lines = explore(link, lines, visited);
+        }
         return lines;
-
-
     }
-
 }
