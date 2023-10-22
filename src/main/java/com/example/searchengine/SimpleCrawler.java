@@ -27,7 +27,6 @@ public class SimpleCrawler extends Crawler {
             e.printStackTrace();
         }
     }
-
     /**
      *
      * @param startUrl the url where the crawling operation starts

@@ -5,12 +5,19 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.PostConstruct;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-
+import java.util.stream.Collectors;
 
 
 @RestController
@@ -46,21 +53,35 @@ public class SearchEngine {
 		}
 	}
 	@GetMapping("/search")
-	public List<String> search(@RequestParam String q){
-		List<String> temp = searcher.search(q.toLowerCase(), flippedIndexFileName);
-		if (temp.isEmpty()) {
-			temp.add("Keyword does not exist.");
-			return temp;
+	public ResponseEntity<String> search(@RequestParam String q, @RequestHeader("Accept") String accept){
+		HttpHeaders httpHeaders = new HttpHeaders();
+		if (q.isEmpty()) return new ResponseEntity<>("Query is empty.", HttpStatus.BAD_REQUEST);
+		List<String> results = searcher.search(q.toLowerCase(), flippedIndexFileName);
+		if (accept.contains("application/json")){
+			ArrayList<String> temp = new ArrayList<>();
+			for (String link : results) temp.add("\"" + link + "\"");
+			String joinedString = "[" + String.join(", ", temp) + "]";
+			httpHeaders.put("Content-Type", Collections.singletonList("application/json"));
+			return new ResponseEntity<>(joinedString, httpHeaders, HttpStatus.OK);
 		}
-		return temp.stream().map(link -> "<a href='" + link + "'>" + link + "</a>").toList();
+		return new ResponseEntity<>(results.stream().map(link -> "<a href=\"" + link + "\">" + link + "</a>").collect(Collectors.joining("<br>")), HttpStatus.OK);
 	}
 
 	@GetMapping("/lucky")
-	public String lucky(@RequestParam String q){
+	public ResponseEntity<String> lucky(@RequestParam String q, @RequestHeader("Accept") String accept){
+		if (q.isEmpty()){
+			return new ResponseEntity<>("Query is empty.", HttpStatus.BAD_REQUEST);
+		}
 		List<String> temp = searcher.search(q.toLowerCase(), flippedIndexFileName);
 		if (temp.isEmpty()) {
-			return "Keyword does not exist.";
+			return new ResponseEntity<>("No Keyword found.", HttpStatus.NOT_FOUND);
 		}
-		return temp.get(0);
+		HttpHeaders httpHeaders = new HttpHeaders();
+		if (accept.contains("application/json")){
+			httpHeaders.put("Content-Type", Collections.singletonList("application/json"));
+			return new ResponseEntity<>("\"" + temp.get(0) +"\"", httpHeaders, HttpStatus.OK);
+		}
+		httpHeaders.put("Location", Collections.singletonList(temp.get(0)));
+		return new ResponseEntity<>(httpHeaders, HttpStatus.FOUND);
 	}
 }

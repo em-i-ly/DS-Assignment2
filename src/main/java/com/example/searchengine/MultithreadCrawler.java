@@ -10,64 +10,57 @@ import java.util.*;
 import java.util.concurrent.*;
 
 public class MultithreadCrawler extends Crawler {
-
     private ThreadPoolTaskExecutor executorService;
-
-
-
     private CopyOnWriteArraySet<String> visited;
-
     private CopyOnWriteArraySet<String[]> lines;
-
-
-
     private ObserveRunnable observeRunnable;
-
     private boolean done = false;
 
-    public MultithreadCrawler(String indexFileName){
-        //TODO: initialize
+    public MultithreadCrawler(String indexFileName) {
         super(indexFileName);
+        visited = new CopyOnWriteArraySet<>();
+        lines = new CopyOnWriteArraySet<>();
+        executorService = new ThreadPoolTaskExecutor();
+        executorService.setCorePoolSize(50);
+        executorService.setMaxPoolSize(100);
+        executorService.initialize();
     }
 
-    public void crawl(String startUrl){
+    public void crawl(String startUrl) {
         double startTime = System.currentTimeMillis();
-        //TODO: complete
+        executorService.submit(new CrawlerRunnable(this, startUrl));
+        new Thread(new ObserveRunnable(this)).run();
         double endTime = System.currentTimeMillis();
         double duration = endTime - startTime;
-        System.out.println("duration: "+duration);
-
+        System.out.println("duration: " + duration);
     }
 
-
-    /*
-      TODO: complete class.
-      The purpose of this runnable is to do two tasks:
-      1. Process the page at the given url (startUrl).
-      2. Create new jobs for the hyperlinks found in the page.
-      The instances of this class are used as input to the executorService.submit method.
-       */
-    class CrawlerRunnable implements Runnable{
-
+    class CrawlerRunnable implements Runnable {
         MultithreadCrawler crawler;
-
         String startUrl;
 
-        public CrawlerRunnable(MultithreadCrawler crawler, String startUrl){
+        public CrawlerRunnable(MultithreadCrawler crawler, String startUrl) {
             this.crawler = crawler;
             this.startUrl = startUrl;
-
         }
 
         @Override
         public void run() {
-
+            if (visited.contains(startUrl)) return;
+            List<List<String>> content = getInfo(startUrl);
+            String[] keywords = new String[content.get(0).size() + 1];
+            keywords[0] = startUrl.substring(startUrl.lastIndexOf('/'));
+            System.arraycopy(content.get(0).toArray(String[]::new), 0, keywords, 1, content.get(0).size());
+            lines.add(keywords);
+            visited.add(startUrl);
+            for (String link : content.get(1)) {
+                executorService.submit(new CrawlerRunnable(crawler, link));
+            }
         }
     }
 
     class ObserveRunnable implements Runnable {
         private MultithreadCrawler crawler;
-
 
         public ObserveRunnable(MultithreadCrawler crawler) {
             this.crawler = crawler;
@@ -75,7 +68,24 @@ public class MultithreadCrawler extends Crawler {
 
         @Override
         public void run() {
-            //TODO: complete
+            while (executorService.getActiveCount() > 0) {
+                try {
+                    Thread.sleep(500);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+            executorService.shutdown();
+            try {
+                FileWriter fileWriter = new FileWriter(indexFileName);
+                CSVWriter writer = new CSVWriter(fileWriter, ',', CSVWriter.NO_QUOTE_CHARACTER, ' ', "\r\n");
+                for (String[] line : lines) {
+                    writer.writeNext(line);
+                }
+                writer.close();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
     }
 }

@@ -10,7 +10,6 @@ import org.springframework.stereotype.Component;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
-@Component
 public abstract class Crawler {
 
      final String indexFileName;
