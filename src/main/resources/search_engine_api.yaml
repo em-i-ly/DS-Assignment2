@@ -63,7 +63,7 @@
           "description": "This response is returned when the request is missing the query string parameter."
         404:
           "description": "This response is returned when no page is found for the given keyword."
-  "/crawl":
+  "/admin/crawl":
     post:
       summary: "Launch new crawling operation"
       responses:
@@ -76,7 +76,7 @@
         409:
           description: "Crawling operation still ongoing"
 
-  "/flipIndex":
+  "/admin/flipIndex":
     post:
       summary: "Regenerate flipped index"
       responses:
@@ -86,7 +86,7 @@
             text/html:
               schema:
                 $ref: '#/components/schemas/AdminPage'
-  "/url_record/{recordId}":
+  "/admin/url_record/{recordId}":
     delete:
       summary: "Delete url from index"
       parameters:
@@ -102,7 +102,9 @@
             text/html:
               schema:
                 $ref: '#/components/schemas/AdminPage'
-  "/updateUrl":
+        404:
+          description: "Link not found."
+  "/admin/updateUrl":
     put:
       summary: "Add information to given url"
       parameters:

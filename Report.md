@@ -67,8 +67,8 @@ of an existing resource. The response type for this operation is simply a 200 OK
 index.csv file exists.
 
 To delete a url from the index I used the delete request. I think this is an obvious choice because we are requesting the
-deletion of a certain url. This delete request has a 200 OK response code. Once again I am assuming that the requested url
-to be deleted actually exists. 
+deletion of a certain url. This delete request has a 200 OK response code. Just incase the URL that was requested to be 
+deleted does not exist, I added a 404 Not Found response code.
 
 To update the information concerning a given URL in the index I used a put request because we are updating a current resource 
 with new data. This aligns with typical put requests. This put request haa a 200 OK response code. I return the 200 code when 
