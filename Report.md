@@ -6,7 +6,7 @@ Emily Gallacher
 
 # GitHub link to your (forked) repository
 
-https://github.com/em-i-ly/Assignment2.git
+https://github.com/em-i-ly/DS-Assignment2.git
 
 # Task 1
 
